@@ -1,4 +1,4 @@
-# PowerPoint Cleanup Tools
+# PowerPoint Cleanup Tool - Python/Windows Guide
 
 Remove unused images, slide masters, and layouts from PowerPoint (.pptx) files to reduce file size.
 
@@ -9,20 +9,7 @@ PowerPoint files often contain unused content from:
 - Deleted slides that left behind images
 - Multiple themes merged together
 
-This toolkit identifies and removes that bloat.
-
-## Quick Start
-
-```bash
-# Analyze a presentation (no changes)
-python pptx_cleanup.py ./my_presentation/
-
-# Remove unused images
-python pptx_cleanup.py ./my_presentation/ --remove-images
-
-# Full cleanup via bash script (WSL/Linux)
-./cleanup.sh presentation.pptx cleaned.pptx
-```
+This tool identifies and removes that bloat using Python (works on Windows, Mac, or Linux).
 
 ---
 
@@ -33,52 +20,36 @@ python pptx_cleanup.py ./my_presentation/ --remove-images
 Download and install Python 3.10+ from [python.org/downloads](https://www.python.org/downloads/). During installation, check "Add Python to PATH".
 
 Verify installation:
-```bash
+```powershell
 python --version
 ```
 
 No additional packages required - uses only Python standard library.
 
-### WSL (Windows Subsystem for Linux)
-
-WSL lets you run Linux commands and bash scripts on Windows. Install from PowerShell (Admin):
-
-```powershell
-wsl --install
-```
-
-Restart your computer, then open "Ubuntu" from Start menu to complete setup. See [Microsoft WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/install) for details.
-
-### Unzip Tools
-
-**Windows:** Use built-in extraction (right-click → Extract All) or install [7-Zip](https://www.7-zip.org/).
-
-**WSL/Linux:** `unzip` and `zip` are usually pre-installed. If not:
-```bash
-sudo apt install zip unzip
-```
-
 ---
 
 ## Usage
 
-### Method 1: Python Script (Recommended)
+### Step 1: Unzip the PowerPoint
 
-#### Step 1: Unzip the PowerPoint
+PowerPoint files are ZIP archives. Choose one method:
 
-Rename `.pptx` to `.zip` and extract, or:
+**Option A: Manual (Windows Explorer)**
+1. Make a copy of your `.pptx` file (always keep a backup!)
+2. Rename the copy from `.pptx` to `.zip`
+3. Right-click the `.zip` file → "Extract All..."
+4. Extract to a folder (e.g., `presentation`)
 
-```bash
-# WSL/Linux
-unzip presentation.pptx -d presentation/
-
-# Windows PowerShell
+**Option B: PowerShell Command**
+```powershell
 Expand-Archive presentation.pptx -DestinationPath presentation
 ```
 
-#### Step 2: Analyze
+### Step 2: Analyze
 
-```bash
+Open PowerShell or Command Prompt and run:
+
+```powershell
 python pptx_cleanup.py ./presentation/
 ```
 
@@ -88,9 +59,9 @@ This produces a report showing:
 - Active vs unused images
 - Total space that can be reclaimed
 
-#### Step 3: Remove Unused Content
+### Step 3: Remove Unused Content
 
-```bash
+```powershell
 # Safe: Remove only unused images
 python pptx_cleanup.py ./presentation/ --remove-images
 
@@ -104,53 +75,30 @@ python pptx_cleanup.py ./presentation/ --remove-masters
 python pptx_cleanup.py ./presentation/ --remove-images --remove-layouts
 ```
 
-#### Step 4: Re-zip
+### Step 4: Re-zip as PowerPoint
 
-```bash
-# WSL/Linux
-cd presentation
-zip -r ../cleaned.pptx .
-cd ..
+Choose one method:
 
-# Windows
-# Right-click presentation folder → Send to → Compressed (zipped) folder
-# Zipping the parent "/presentation" folder will cause an error
-# Make sure to zip the CONTENT of the /presentation folder
-# Rename .zip to .pptx
+**Option A: Manual (Windows Explorer)**
+1. Open the `presentation` folder
+2. Select ALL contents inside (Ctrl+A)
+3. Right-click → "Send to" → "Compressed (zipped) folder"
+4. A new `.zip` file will be created
+5. Move it outside the presentation folder
+6. Rename from `.zip` to `.pptx`
+
+> **IMPORTANT:** Zip the CONTENTS of the folder, not the folder itself!
+> Zipping the parent folder will cause PowerPoint to fail to open the file.
+
+**Option B: PowerShell Command**
+```powershell
+Compress-Archive -Path .\presentation\* -DestinationPath cleaned.zip
+Rename-Item cleaned.zip cleaned.pptx
 ```
 
-#### Step 5: Test
+### Step 5: Test
 
 Open the cleaned `.pptx` in PowerPoint and verify all slides display correctly.
-
-### Method 2: Bash Script (WSL/Linux)
-
-One-command cleanup:
-
-```bash
-./cleanup.sh input.pptx output.pptx
-```
-
-This automatically:
-1. Unzips the presentation
-2. Removes unused images and layouts
-3. Re-zips to output file
-4. Reports size savings
-
-### Method 3: Manual with Generated Scripts
-
-After running the analyzer, use the generated bash scripts:
-
-```bash
-cd presentation/
-
-# In WSL
-bash remove_unused_images.sh
-bash remove_unused_layouts.sh
-bash remove_unused_masters.sh
-```
-
-Or review `unused_components.txt` and delete files manually.
 
 ---
 
@@ -159,8 +107,8 @@ Or review `unused_components.txt` and delete files manually.
 | File | Description |
 |------|-------------|
 | `pptx_cleanup.py` | Main Python script - analyzes and cleans |
-| `cleanup.sh` | Bash wrapper for one-command cleanup |
-| `README.md` | This documentation |
+| `README_PY.md` | This documentation (Python/Windows) |
+| `README_WSL.md` | Documentation for Bash/WSL users |
 
 ### Generated Files (in presentation folder)
 
@@ -221,14 +169,12 @@ The tool:
 **"presentation.xml not found"**
 Ensure you're pointing to the unzipped folder, not the .pptx file.
 
-**Script won't run in WSL**
-Make it executable: `chmod +x cleanup.sh`
-
 **PowerPoint won't open cleaned file**
-Restore from backup and try removing only images first.
+- Make sure you zipped the CONTENTS of the folder, not the folder itself
+- Restore from backup and try removing only images first
 
 **Python not found**
-Ensure Python is in PATH. On Windows, reinstall with "Add to PATH" checked.
+Ensure Python is in PATH. Reinstall with "Add to PATH" checked.
 
 ---
 
